@@ -2,8 +2,7 @@
 # Remote Sensed Data accquisition 
 
 # Canadian Free Lidar Data
-https://canadiangis.com/free-canada-lidar-data.php
-
+#https://canadiangis.com/free-canada-lidar-data.php
 
 
 #Landsat 
@@ -41,4 +40,67 @@ landsat_download(download_url = downurl$product_dload_url, dest_file = getwd())
 
 
 
+# Sentinel ----------------------------------------------------------------
+unzip("../data/20191106_Day_2_PM_Raster/raster_sentinel_imagery.zip", exdir = "Exercise3_data")
 
+
+
+# Lidar -------------------------------------------------------------------
+
+#install.packages(c("rLiDAR)"))
+library(lidR)
+library(rlas)
+#library(rLiDAR)
+
+data.dir <- "C:/Temp/00.Ninox/Floodmapping/Data/Lidar"
+
+
+files <- list.files(data.dir)
+
+las <- lidR::readLAS(file.path(data.dir,"points.las" ))
+#las <- lidR::readLAS(files[1])#, select = "xyz", filter = "keep_first")
+las
+las@data
+las@header
+las@bbox
+las@proj4string
+lascheck(las)
+plot(las)
+e <- extent(las@bbox)
+e <- e + 1000 # add this as all y's are the same
+xmin = e[1]
+xmax = e[2]
+ymin = e[3]
+ymax = e[4]
+f <- 2
+r <- raster(e, ncol=(xmax-xmin)/f, nrow=(ymax - ymin)/f)
+x <- rasterize(las@data[, 1:2], r, las@data[,3], fun=min)
+
+writeRaster(x = x, filename = file.path(data.dir,"points.tif"))
+
+area(las)
+
+library(raster)
+library(sf)
+library(ggplot2)
+library(dplyr)
+
+con <- rasterToContour(x)
+con_sf <- st_as_sf(con)
+
+conp <- rasterToPolygons(x)
+conp_sf <- st_as_sf(conp)
+plot(conp_sf)
+
+conp_sf <- conp_sf %>%
+  mutate(zclass = as.numeric(layer))
+
+
+head(conp_sf)
+
+ggplot() +
+  geom_sf(data =con_sf)
+
+
+ggplot() + 
+  geom_line(con_sf)
