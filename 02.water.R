@@ -101,6 +101,9 @@ leaflet(df) %>% addTiles() %>%
 #R - Revised : The symbol R indicates that a revision, correction or addition has been made to the historical discharge database after January 1, 1989.
 
 # REFERENCES: 
+
+#https://cran.r-project.org/web/packages/tidyhydat/vignettes/tidyhydat_an_introduction.html
+
 # Search the station numbers 
 #https://wateroffice.ec.gc.ca/google_map/google_map_e.html?map_type=real_time&search_type=province&province=BC
 #https://www.canada.ca/en/environment-climate-change/services/meteorological-service-standards/publications/hydrometric-data-information/chapter-1.html
