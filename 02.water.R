@@ -1,6 +1,5 @@
-remotes::install_github("ropensci/tidyhydat")
+#remotes::install_github("ropensci/tidyhydat")
 
-library("tidyhat")
 
 library(tidyhydat)
 library(dplyr)
@@ -40,25 +39,57 @@ data.type <- hdata %>%
 # Real time data: 
 # note this is unvetted data sources:
 
-realtime_stations("08NM050")
-bcrt <- realtime_stations(prov_terr_state_loc = "BC")
-bcrt_sf <- st_as_sf(bcrt, coords = c("LATITUDE", "LONGITUDE")) %>%
-  crs(4238)
-
-
+library(mapview)
 
 library(ggplot2)
 library(bcmaps)
 library(sf)
 
 
-ggplot() +
-  geom_sf(data = bc_bound()) + 
-  geom_point(bcrt, aes(y = LATITUDE, x = LONGITUDE))
+#realtime_stations("08NM084")
+bcrt <- realtime_stations(prov_terr_state_loc = "BC") 
 
 
 
-mapview::mapview()
+bcrt_sf <- st_as_sf(bcrt, coords = c("LATITUDE", "LONGITUDE")) %>%
+  left_join(st_coordinates)
+
+bc <- bc_bound() %>%
+  st_simplify(., TRUE, 10) %>%
+  st_transform(4326)
+
+
+# create a leaflet map 
+
+library(leaflet)
+library(envreportutils)
+
+watermap <- leaflet(width = "900px", height = "600px", 
+                    options = leafletOptions(minZoom = 5)) %>%  # generate leaflet map
+  addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
+  add_bc_home_button() %>%
+  set_bc_view()
+
+
+
+
+watermap  %>% 
+  addPolygons(data = bc, 
+              stroke = T, weight = 1, color = "black", # Add border to polygons
+              fillOpacity = 0.5) %>%
+  addMarkers(bcrt, ~LATITUDE, ~LONGITUDE)
+
+# Create a palette that maps factor levels to colors
+pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
+
+leaflet(df) %>% addTiles() %>%
+  addCircleMarkers(
+    radius = ~ifelse(type == "ship", 6, 10),
+    color = ~pal(type),
+    stroke = FALSE, fillOpacity = 0.5
+  )
+
+
   
 # Notes
 
