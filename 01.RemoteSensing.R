@@ -78,6 +78,10 @@ x <- rasterize(las@data[, 1:2], r, las@data[,3], fun=min)
 
 writeRaster(x = x, filename = file.path(data.dir,"points.tif"))
 
+x <- raster()
+
+# convert to contours 
+
 area(las)
 
 library(raster)
@@ -85,15 +89,31 @@ library(sf)
 library(ggplot2)
 library(dplyr)
 
-con <- rasterToContour(x)
-con_sf <- st_as_sf(con)
+#con <- rasterToContour(x)
+#con_sf <- st_as_sf(con)
 
-conp <- rasterToPolygons(x)
+unique(x$layer)
+
+conp <- rasterToPolygons(x) # too slow 
+
 conp_sf <- st_as_sf(conp)
 plot(conp_sf)
 
 conp_sf <- conp_sf %>%
   mutate(zclass = as.numeric(layer))
+
+
+# convert raster to polygon. Note this also takes some time
+library(stars)
+
+x <- st_as_stars(x) %>% 
+  st_as_sf() %>% # this is the raster to polygons part
+  st_cast("MULTIPOLYGON") # cast the polygons to polylines
+
+
+plot(x)
+
+
 
 
 head(conp_sf)
@@ -104,3 +124,6 @@ ggplot() +
 
 ggplot() + 
   geom_line(con_sf)
+
+# open street maps
+https://dominicroye.github.io/en/2018/accessing-openstreetmap-data-with-r/
