@@ -36,6 +36,22 @@ data.type <- hdata %>%
   group_by(Symbol) %>%
   summarise(count = n())
 
+library(lubridate)
+
+highflow <- hdata %>%
+  filter(Value > 70) %>%
+  mutate(Date1 = year(as_date(Date))) %>% 
+  filter(Date1 == 2017)
+
+
+
+
+
+
+
+
+
+
 # Real time data: 
 # note this is unvetted data sources:
 
